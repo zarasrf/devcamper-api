@@ -5,13 +5,17 @@
   "main": "server.js",
   "scripts": {
     "start": "NODE-ENV=production node server",
-    "dev":"nodemon server"
+    "dev": "nodemon server"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "color": "^4.2.3",
+    "colors": "^1.4.0",
     "dotenv": "^16.3.1",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "mongoose": "^7.4.3",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

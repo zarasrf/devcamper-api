@@ -1,34 +1,42 @@
 const express = require ('express')
 const dotenv =require('dotenv')
+const morgan = require ('morgan')
+const colors = require ('colors')
+const connectDB = require('./config/db')
+
 
 // load env vars 
 dotenv.config({ path: './config/config.env'})
 
+// connect to database
+connectDB()
+
+// route files
+const bootcamps = require ('./routes/bootcamps')
+
 const app = express()
-app.get('/api/v1/bootcamps', (req, res) => {
-    res.status(200).json({success: true, msg: 'show all bootcamps' })
 
-})
-app.get('/api/v1/bootcamps/:id', (req, res) => {
-    res.status(200).json({success: true, msg: 'show bootcamp' })
+// Body parser
+// app.use(express.json())
 
-})
-app.post('/api/v1/bootcamps', (req, res) => {
-    res.status(200).json({success: true, msg: 'create new bootcamp' })
+// dev logging middleware 
+if (process.env.NODE_ENV === 'development')
+app.use(morgan('dev'))
 
-})
-app.put('/api/v1/bootcamps/:id', (req, res) => {
-    res.status(200).json({success: true, msg: `update bootcamp ${req.params.id}` })
-
-})
-app.delete('/api/v1/bootcamps/:id', (req, res) => {
-    res.status(200).json({success: true, msg: `delete bootcamp ${req.params.id}`  })
-
-})
+// mount routers
+app.use('/api/v1/bootcamps', bootcamps)
 
 const PORT = process.env.PORT || 5000
 
-app.listen(
+ const server = app.listen(
   PORT,
-  console.log(`server running in ${process.env.NODE_ENV} mode on port ${PORT}`)
+  console.log(`server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold)
 )
+
+// handel unhandel promise rejections
+process.on ('unhandleRejection',(err, promise) =>{
+    console.log(`Error: ${err.message}`.red)
+
+    // close the server & exit process
+    server.close(() => process.exit(1))
+})
