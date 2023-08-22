@@ -52,7 +52,7 @@
 		"jobGuarantee": false,
 		"acceptGi": false,
 		"location": {
-			"type": "point",
+			"type": "Point",
 			"coordinates": [-71.057083, 42.361145]
 		}
 	},
