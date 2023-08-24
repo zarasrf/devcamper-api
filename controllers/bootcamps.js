@@ -3,21 +3,46 @@ const asyncHandler = require('../middleware/async')
 const geocoder = require('../utils/geocoder')
 const Bootcamp = require('../models/Bootcamp')
 
-
 // @desc     Get all bootcamps
 // @route    Get/api/v1/bootcamps
 // acess     Public 
 exports.getBootcamps = asyncHandler(async (req, res, next) => {
         let query
 
-        let queryStr = JSON.stringify(req.query)
+        // copy req.query
+        const reqQuery = { ...req.query }
 
+        // fields to exclude
+        const removeFields = ['select']
+
+        // Loop over removeFields and delete them nfrom reqQuery
+        removeFields.forEach(param => delete reqQuery[param]) 
+
+        // create query string
+        let queryStr = JSON.stringify(reqQuery)
+
+        // create operators ($gt, $gte, etc)
         queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`)
 
-
+        // finding resource
         query = Bootcamp.find(JSON.parse(queryStr))
 
+        // select fields
+        if(req.query.select) {
+            const fields = req.query.select.split(',').join(' ')
+            query = query.select(fields)
+        }
 
+        // sort
+        // i have an issiu here,this sort dosent work ,back to slect/soert in section 6
+        if (req.query.sort) {
+            const sortBy = req.query.sort.split(',').join(' ')
+            query = query.sort(sortBy)
+        } else {
+            query = query.sort('-createdAt')
+        }
+
+        // executing query
         const bootcamps = await query
 
         // if (bootcamps.length === 0) {
