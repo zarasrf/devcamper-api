@@ -13,7 +13,7 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
         const reqQuery = { ...req.query }
 
         // fields to exclude
-        const removeFields = ['select']
+        const removeFields = ['select','sort','page','limit']
 
         // Loop over removeFields and delete them nfrom reqQuery
         removeFields.forEach(param => delete reqQuery[param]) 
@@ -34,7 +34,6 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
         }
 
         // sort
-        // i have an issiu here,this sort dosent work ,back to slect/soert in section 6
         if (req.query.sort) {
             const sortBy = req.query.sort.split(',').join(' ')
             query = query.sort(sortBy)
@@ -42,8 +41,34 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
             query = query.sort('-createdAt')
         }
 
+        // pagination 
+        const page = parseInt(req.query.page, 10) || 1
+        const limit = parseInt(req.query.limit, 10) || 25
+        const startIndex = ( page -1 ) * limit
+        const endIndex = page * limit
+        const total = await Bootcamp.countDocuments()
+
+        query = query.skip(startIndex).limit(limit)
+
         // executing query
         const bootcamps = await query
+
+        // pagination result 
+        const pagination = {}
+
+        if(endIndex < total) {
+            pagination.next = {
+                page: page + 1,
+                limit
+            }
+        }
+
+        if(startIndex > 0) {
+            pagination.prev = {
+                page: page - 1,
+                limit
+            }
+        }
 
         // if (bootcamps.length === 0) {
         //     return next(new ErrorResponse(`bootcamp not found with id of Object`, 404));
@@ -51,7 +76,7 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
 
         res
         .status(200)
-        .json({ success: true, count: bootcamps.length, data:bootcamps })
+        .json({ success: true, count: bootcamps.length, pagination, data:bootcamps })
 })
 
 // @desc     Get single bootcamp
