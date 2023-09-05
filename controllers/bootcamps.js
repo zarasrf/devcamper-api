@@ -6,7 +6,7 @@ const Bootcamp = require('../models/Bootcamp')
 const Course = require('../models/Course') //aded
 
 // @desc     Get all bootcamps
-// @route    Get/api/v1/bootcamps
+// @route    GET/api/v1/bootcamps
 // acess     Public 
 exports.getBootcamps = asyncHandler(async (req, res, next) => {
         res.status(200).json(res.advancedResults)
