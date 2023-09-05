@@ -6,6 +6,7 @@ const BootcampSchema = new mongoose.Schema(
     {
     name: {
         type: String,
+  
         required: [true, 'please add a name'],
         unique: true,
         trim: true,
@@ -107,7 +108,7 @@ const BootcampSchema = new mongoose.Schema(
 // create bootcamp slug from the name
 BootcampSchema.pre('save',function(next){
     this.slug = slugify(this.name, { lower: true })
-    // console.log('Slugify ran', this.name)
+    console.log('Slugify ran', this.name)
     next()
 })
 
