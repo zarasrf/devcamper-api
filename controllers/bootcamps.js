@@ -33,9 +33,19 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
 // @route    POST/api/v1/bootcamps
 // acess     Private
 exports.createBootcamp =asyncHandler( async (req, res, next) => {
-    
+    // Add user to req.body
+    req.body.user = req.user.id
+
+    // Checked for published bootcamp
+    const publishedBootcamp = await Bootcamp.findOne ({ user: req.user.id })
+
+    // If the user is not an admin, they can only add one bootcamp
+    if(publishedBootcamp  && req.user.role !== 'admin') {
+        return next(new ErrorResponse(`The user${req.user.id} has already published a bootcamp`, 400))
+    }
 
         const bootcamp = await Bootcamp.create(req.body)
+
 
     res
     .status(201)
@@ -50,7 +60,7 @@ exports.createBootcamp =asyncHandler( async (req, res, next) => {
 // @route    PUT/api/v1/bootcamps/:id
 // acess     Private
 exports.updateBootcamp = asyncHandler(async (req, res, next) => {
-        const bootcamp = await Bootcamp.findById(req.params.id,{
+        const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id,{
             new: true,
             runValidators: true
         })
@@ -60,7 +70,7 @@ exports.updateBootcamp = asyncHandler(async (req, res, next) => {
                 new ErrorResponse(`Bootcam not found with id of ${req.params.id}`, 404))
         }
 
-        bootcamp.remove()
+        // bootcamp.remove()
         
 
         res
@@ -82,7 +92,7 @@ exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
         await Course .deleteMany({ bootcamp: bootcamp._id})
         bootcamp.deleteOne()
 
-        bootcamp.remove() 
+        // bootcamp.remove() 
         
         res
         .status(200)
